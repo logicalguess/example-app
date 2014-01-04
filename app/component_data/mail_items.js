@@ -4,65 +4,36 @@ define(
 
   [
     'flight/lib/component',
+    'app/component_pure/mail_items_data',
     'components/mustache/mustache',
     'app/data',
     'app/templates'
   ],
 
-  function(defineComponent, Mustache, dataStore, templates) {
-    return defineComponent(mailItems);
-
-    function mailItems() {
-
-      this.defaultAttrs({
-        folder: 'inbox',
-        dataStore: dataStore
-      });
-
-      this.serveMailItems = function(ev, data) {
-        var folder = (data && data.folder) || this.attr.folder;
-        this.trigger("dataMailItemsServed", {markup: this.renderItems(this.assembleItems(folder))})
-      };
-
-      this.renderItems = function(items) {
-        return Mustache.render(templates.mailItem, {mailItems: items});
-      };
-
-      this.assembleItems = function(folder) {
-        var items = [];
-
-        this.attr.dataStore.mail.forEach(function(each) {
-          if (each.folders && each.folders.indexOf(folder) > -1) {
-            items.push(this.getItemForView(each));
-          }
-        }, this);
-
-        return items;
-      };
-
-      this.getItemForView = function(itemData) {
-        var thisItem, thisContact, msg
-
-        thisItem = {id: itemData.id, important: itemData.important};
-
-        thisContact = this.attr.dataStore.contacts.filter(function(contact) {
-          return contact.id == itemData.contact_id
-        })[0];
-        thisItem.name = [thisContact.firstName, thisContact.lastName].join(' ');
-
-        var subj = itemData.subject;
-        thisItem.formattedSubject = subj.length > 70 ? subj.slice(0, 70) + "..." : subj;
-
-        var msg = itemData.message;
-        thisItem.formattedMessage = msg.length > 70 ? msg.slice(0, 70) + "..." : msg;
-
-        return thisItem;
-      };
-
-      this.after("initialize", function() {
-        this.on("uiMailItemsRequested", this.serveMailItems);
-        this.on("dataMailItemsRefreshRequested", this.serveMailItems);
-      });
+    function (defineComponent, mailItems, Mustache, dataStore, templates) {
+        //return createComponent(defineComponent, arguments, mailItems);
+        return defineComponent(function() {
+            var self = this;
+            mailItems.call(self, Mustache, dataStore, templates.mailItem);
+        });
     }
-  }
 );
+
+function createComponent(factory, args, targets) {
+    var defineComponent = factory; //args[0];
+    var argz = [];
+    for (var i = 2; i < args.length; i++) {
+        argz.push(args[i]);
+    }
+    return defineComponent(function() {
+        var self = this;
+        if (Array.isArray(targets)) {
+            for (var i = 0; i < targets.length; i++) {
+                targets[i].apply(self, argz);
+            }
+        }
+        else {
+            targets.apply(self, argz);
+        }
+    });
+}
