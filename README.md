@@ -60,10 +60,10 @@ Here is an example, component_data/move_to.js:
       }
     );
 
-The <code>moveTo</code> function decorated with traits to become a component at the same place it is defined.
+The <code>moveTo</code> function is decorated with traits to become a component at the same place it is defined.
 Its definition does not include parameters, instead these are taken from the enclosing scope.
 
-The <code>moveTo</code> function, although pure, it is not reusable and its usage is specific to FlightJs.
+The <code>moveTo</code> function, although plain JavaScript, it is not reusable and its usage is specific to FlightJs.
 Instead, it would be ideal to be able to reuse the plain functions and define them in a way that relies on a minimal
 contract. We can define <code>moveTo</code> in its own file, and make sure its parameters don't make
 assumptions about the implementation of the traits that will be mixed in to transform it into a component. Instead
